@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--指定匹配的对应mapper.java文件-->
+<mapper namespace="com.cm.dao.mapper.ArticleMapper">
+
+    <resultMap id="articleMap" type="com.cm.pojo.Article">
+        <result column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="view_counts" property="viewCounts"/>
+        <result column="comment_count" property="commentCounts"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="author_id" property="authorId"/>
+        <result column="body_id" property="bodyId"/>
+        <result column="weight" property="weight"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+
+    <!--    查询文章的归档信息-->
+    <select id="ListArchives" resultType="java.util.HashMap">
+        select year(from_unixtime(create_date / 1000, '%Y-%m-%d %h:%i:%s'))  as year,
+               month(from_unixtime(create_date / 1000, '%Y-%m-%d %h:%i:%s')) as month,
+               count(*)                                                      as count
+        from ms_article
+        group by year, month
+    </select>
+<!--    查询文章列表-->
+    <select id="listArticle" resultMap="articleMap">
+        select * from ms_article
+        <where>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="tagId != null">
+                and id in(select article_id from ms_article_tag where tag_id = #{tagId})
+            </if>
+            <if test="year != null and year.length > 0 and month  != null and month.length >0">
+                and ( FROM_UNIXTIME(create_date/1000,'%Y') = #{year}
+                and FROM_UNIXTIME(create_date/1000,'%m') = #{month}
+                )
+            </if>
+        </where>
+        order by create_date desc
+    </select>
+</mapper>

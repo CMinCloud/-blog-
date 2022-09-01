@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--指定匹配的对应mapper.java文件-->
+<mapper namespace="com.cm.dao.mapper.TagMapper">
+
+<!--    <resultMap id="" type="">-->
+<!--        <result column="" property=""></result>-->
+<!--    </resultMap>-->
+
+<!--根据文章标签查询标签表中对应标签-->
+    <select id="findTagesBytagIds" resultType="com.cm.pojo.Tag">
+       select id,avatar,tag_name as tagName from ms_tag
+        where id in
+        (select tag_id from ms_article_tag where article_id = #{ArticleId})
+    </select>
+
+<!--    查询最热标签
+注意取值为null可能是因为字段名与实体类名不匹配
+而对于驼峰命名的实体类，MP会自动转换    -->
+    <select id="listHotTagsByLimits" resultType="com.cm.pojo.Tag">
+        select tag_id as id,tag_name  from ms_article_tag,ms_tag
+        where tag_id = ms_tag.id
+        group by tag_id order by count(1) desc limit ${limit}
+    </select>
+
+</mapper>
